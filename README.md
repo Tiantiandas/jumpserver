@@ -41,6 +41,7 @@ docker volume create jms_mysql
 docker run -d --name jms_mysql \
     --restart=always \
     -p 3306:3306 \
+    -e "MYSQL_ROOT_PASSWORD=testpw" \
     -v jms_mysql:/var/lib/mysql mysql:5.7.23
 ```
 <br>
