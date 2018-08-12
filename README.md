@@ -36,10 +36,10 @@ DB_PORT=3306
 ```sh
 docker volume create jms_mysql
 
-docker run -d --name jms_mariadb \
+docker run -d --name jms_mysql \
     --restart=always \
     -p 3306:3306 \
-    -v jms_mariadb:/var/lib/mysql mysql:5.7.23
+    -v jms_mysql:/var/lib/mysql mysql:5.7.23
 ```
 <br>
 
