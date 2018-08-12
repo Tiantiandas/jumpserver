@@ -19,7 +19,6 @@ VOLUME /opt/luna
 VOLUME /opt/coco/keys
 VOLUME /opt/jumpserver/data
 
-# 7. 准备文件
 COPY luna luna
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY supervisord.conf /etc/supervisord.conf
@@ -31,10 +30,7 @@ ENV DB_ENGINE=mysql \
     DB_PORT=3306 \
     DB_USER=jms \
     DB_PASSWORD=jumpserver \
-    DB_NAME=jumpserver \
-    REDIS_HOST=127.0.0.1 \
-    REDIS_PORT=6379 
+    DB_NAME=jumpserver 
 
 EXPOSE 2222 80
 ENTRYPOINT ["entrypoint.sh"]
-
