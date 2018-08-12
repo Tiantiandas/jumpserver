@@ -96,7 +96,7 @@ upstream jumpserver{
 
 server {
     listen 80;
-    server_name  52.194.23.216;
+    server_name  _;
 
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header Host $host;
