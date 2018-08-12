@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block custom_head_css_js %}
+    <link href="{% static 'css/plugins/select2/select2.min.css' %}" rel="stylesheet">
+    <script src="{% static 'js/plugins/select2/select2.full.min.js' %}"></script>
+{% endblock %}
+{% block content %}
+    <div class="wrapper wrapper-content animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox float-e-margins">
+                    <div class="panel-options">
+                        <ul class="nav nav-tabs">
+                            <li>
+                                <a href="{% url 'assets:system-user-detail' pk=system_user.id %}" class="text-center"><i class="fa fa-laptop"></i> {% trans 'Detail' %} </a>
+                            </li>
+                            <li class="active">
+                                <a href="{% url 'assets:system-user-asset' pk=system_user.id %}" class="text-center">
+                                <i class="fa fa-bar-chart-o"></i> {% trans 'Assets' %}
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="tab-content">
+                        <div class="col-sm-8" style="padding-left: 0;">
+                            <div class="ibox float-e-margins">
+                                <div class="ibox-title">
+                                    <span style="float: left">{% trans 'Assets of ' %} <b>{{ system_user.name }} </b><span class="badge">{{ paginator.count }}</span></span>
+                                    <div class="ibox-tools">
+                                        <a class="collapse-link">
+                                            <i class="fa fa-chevron-up"></i>
+                                        </a>
+                                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                            <i class="fa fa-wrench"></i>
+                                        </a>
+                                        <ul class="dropdown-menu dropdown-user">
+                                        </ul>
+                                        <a class="close-link">
+                                            <i class="fa fa-times"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="ibox-content">
+                                    <table class="table table-hover" id="system_user_list">
+                                        <thead>
+                                            <tr>
+                                                <th>{% trans 'Hostname' %}</th>
+                                                <th>{% trans 'IP' %}</th>
+                                                <th>{% trans 'Port' %}</th>
+                                                <th>{% trans 'Reachable' %}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-4" style="padding-left: 0;padding-right: 0">
+                            <div class="panel panel-primary">
+                                <div class="panel-heading">
+                                    <i class="fa fa-info-circle"></i> {% trans 'Quick update' %}
+                                </div>
+                                <div class="panel-body">
+                                    <table class="table">
+                                        <tbody>
+                                        <tr class="no-borders-tr">
+                                            <td width="50%">{% trans 'Push system user now' %}:</td>
+                                            <td>
+                                                <span style="float: right">
+                                                    <button type="button" class="btn btn-primary btn-xs btn-push" style="width: 54px">{% trans 'Push' %}</button>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td width="50%">{% trans 'Test assets connective' %}:</td>
+                                            <td>
+                                                <span style="float: right">
+                                                    <button type="button" class="btn btn-primary btn-xs btn-test-connective" style="width: 54px">{% trans 'Test' %}</button>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block custom_foot_js %}
+<script>
+function initAssetsTable() {
+    var unreachable = {{ system_user.unreachable_assets|safe}};
+    var options = {
+		ele: $('#system_user_list'),
+		buttons: [],
+		order: [],
+		columnDefs: [
+			{targets: 0, createdCell: function (td, cellData, rowData) {
+				var detail_btn = '<a href="{% url "assets:asset-detail" pk=DEFAULT_PK %}" data-aid="'+rowData.id+'">' + cellData + '</a>';
+				$(td).html(detail_btn.replace('{{ DEFAULT_PK }}', rowData.id));
+			}},
+			{targets: 3, createdCell: function (td, cellData) {
+				if (unreachable.indexOf(cellData) >= 0) {
+					$(td).html('<i class="fa fa-times text-danger"></i>')
+				} else {
+					$(td).html('<i class="fa fa-check text-navy"></i>')
+				}
+			}}
+		],
+		ajax_url: '{% url "api-assets:asset-list" %}?system_user_id={{ system_user.id }}',
+		columns: [{data: "hostname" }, {data: "ip" }, {data: "port" }, {data: "hostname" }],
+		op_html: $('#actions').html()
+	};
+	jumpserver.initServerSideDataTable(options);
+}
+
+$(document).ready(function () {
+	$('.select2').select2()
+	.on("select2:select", function (evt) {
+		var data = evt.params.data;
+		jumpserver.assets_selected[data.id] = data.text;
+		jumpserver.asset_groups_selected[data.id] = data.text;
+	})
+	.on('select2:unselect', function(evt) {
+		var data = evt.params.data;
+		delete jumpserver.assets_selected[data.id];
+		delete jumpserver.asset_groups_selected[data.id];
+	});
+	initAssetsTable();
+})
+.on('click', '.btn-push', function () {
+    var the_url = "{% url 'api-assets:system-user-push' pk=system_user.id %}";
+    var error = function (data) {
+        alert(data)
+    };
+    APIUpdateAttr({
+        url: the_url,
+        error: error,
+        method: 'GET',
+        success_message: "{% trans "Task has been send, Go to ops task list seen result" %}"
+    });
+})
+.on('click', '.btn-test-connective', function () {
+    var the_url = "{% url 'api-assets:system-user-connective' pk=system_user.id %}";
+    var error = function (data) {
+        alert(data)
+    };
+    APIUpdateAttr({
+        url: the_url,
+        error: error,
+        method: 'GET',
+        success_message: "{% trans "Task has been send, seen left assets status" %}"
+    });
+})
+
+
+
+</script>
+{% endblock %}
