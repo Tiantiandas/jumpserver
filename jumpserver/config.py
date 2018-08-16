@@ -32,18 +32,13 @@ class Config:
 
     # SQLite setting:
     #MySQL or postgres setting like:
-    #DB_ENGINE = os.environ.get("DB_ENGINE") 
-    #DB_HOST = os.environ.get("DB_HOST") 
-    #DB_PORT = os.environ.get("DB_PORT")
-    #DB_USER = os.environ.get("DB_USER")
-    #DB_PASSWORD = os.environ.get("DB_PASSWORD") 
-    #DB_NAME = os.environ.get("DB_NAME") 
-    DB_ENGINE="mysql"
-    DB_HOST="172.17.0.1"
-    DB_PORT=3306
-    DB_USER="jms"
-    DB_PASSWORD="jumpserver"
-    DB_NAME="jumpserver"
+    DB_ENGINE = os.environ.get("DB_ENGINE") 
+    DB_HOST = os.environ.get("DB_HOST") 
+    DB_PORT = os.environ.get("DB_PORT")
+    DB_USER = os.environ.get("DB_USER")
+    DB_PASSWORD = os.environ.get("DB_PASSWORD") 
+    DB_NAME = os.environ.get("DB_NAME") 
+
 
     # When Django start it will bind this host and port
     # ./manage.py runserver 127.0.0.1:8080
