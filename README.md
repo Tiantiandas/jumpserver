@@ -1,5 +1,3 @@
-## 用 Docker 来构建 Jumpserver
-
 说明: 项目从 [[ Jumpserver 官方 ]](https://github.com/jumpserver/jumpserver.git) fork 而来.
 <br>
 
@@ -14,7 +12,7 @@
 
 **环境依赖**
 
-- mysql 版本: 5.7.23  (问题查看 [[ 这里 ]](https://github.com/jumpserver/jumpserver/issues/1654))
+- mysql 版本: 5.7.23  (查看 [[ 这里 ]](https://github.com/jumpserver/jumpserver/issues/1654))
 - mysql 数据库的字符编码为 : `utf8`. 
 <br>
 
@@ -40,7 +38,6 @@ docker volume create jms_mysql
 
 docker run -d --name jms_mysql \
     --restart=always \
-    -p 3306:3306 \
     -e "MYSQL_ROOT_PASSWORD=testpw" \
     -v jms_mysql:/var/lib/mysql mysql:5.7.23
 ```
@@ -49,6 +46,8 @@ docker run -d --name jms_mysql \
 登录 mysql 创建数据库
 
 ```sh
+docker exec -it jms_mysql mysql -uroot -ptestpw
+
 mysql> CREATE DATABASE `jumpserver` CHARACTER SET utf8;
 mysql> GRANT ALL PRIVILEGES ON `jumpserver`.* TO 'jms'@'172.17.%' IDENTIFIED BY "jumpserver";
 mysql> FLUSH PRIVILEGES;
@@ -66,7 +65,7 @@ docker build -t xxx/jumpserver<:tag> .
 **也可以从 dockerhub 获取**
 
 ```sh
-docker pull zhegao/jumpserver:1.4.0
+docker pull zhegao/jumpserver
 ```
 <br>
 
@@ -76,7 +75,8 @@ docker pull zhegao/jumpserver:1.4.0
 docker run -d --name jms_server \
     -p 8080:80 \
     -p 2222:2222 \
-    -e "DB_HOST=<mysql_host>" \
+    --link jms_mysql:mysql \
+    -e "DB_HOST=jms_mysql" \
     -e "DB_USER=<mysql_user>" \
     -e "DB_PASSWORD=<mysql_password>" \
     -e "DB_NAME=<mysql_dbname>" \
@@ -126,3 +126,33 @@ server {
     }
 }
 ```
+<br>
+
+### SSL 证书生成
+
+[[ letsencrypt ]](https://www.cnblogs.com/tiantiandas/p/letsencrypt_generate_ssl_certificate.html)
+<br><br>
+
+**使用 mkcert 生成证书**
+
+```sh
+# centos
+yum -y install golang nss-tools
+
+# ubuntu
+apt-get install golang libnss3-tools
+
+git clone https://github.com/FiloSottile/mkcert.git
+
+cd mkcert && make 
+
+mv bin/mkcert /bin
+```
+<br>
+
+```sh
+mkcert install
+```
+<br>
+
+具体使用可使用: `mkcert --help`
