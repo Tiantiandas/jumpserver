@@ -81,7 +81,7 @@ docker run -d --name jms_server \
     -e "DB_PASSWORD=<mysql_password>" \
     -e "DB_NAME=<mysql_dbname>" \
     -e "DB_PORT=<mysql_port>" \
-    zhegao/jumpserver:1.4.0
+    zhegao/jumpserver
 ```
 <br>
 
