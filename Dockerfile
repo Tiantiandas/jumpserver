@@ -1,5 +1,5 @@
 FROM ubuntu:18.04
-WORKDIR /opt
+
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get -y update && \
     apt-get -y install tzdata apt-utils language-pack-zh-hans&& \
@@ -10,20 +10,15 @@ RUN apt-get -y update && \
         libsasl2-dev libkrb5-dev vim net-tools && \
     echo 'LANG="zh_CN.UTF-8"' > /etc/default/locale
 
-COPY jumpserver jumpserver
-COPY coco coco
-RUN pip3 install -r jumpserver/requirements/requirements.txt && \
-    pip3 install -r coco/requirements/requirements.txt
-
-VOLUME /opt/luna
-VOLUME /opt/coco/keys
-VOLUME /opt/jumpserver/data
-
-COPY luna luna
+WORKDIR /opt
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY supervisord.conf /etc/supervisord.conf
-COPY entrypoint.sh /bin/entrypoint.sh
-RUN chmod +x /bin/entrypoint.sh
+COPY ["jumpserver", "coco", "luna", "entrypoint.sh", "./"]
+
+RUN pip3 install -r jumpserver/requirements/requirements.txt && \
+    pip3 install -r coco/requirements/requirements.txt 
+
+VOLUME ["/opt/luna","/opt/coco/keys","/opt/jumpserver/data"]
 
 ENV DB_ENGINE=mysql \
     DB_HOST=172.17.0.1 \
@@ -33,4 +28,4 @@ ENV DB_ENGINE=mysql \
     DB_NAME=jumpserver 
 
 EXPOSE 2222 80
-ENTRYPOINT ["entrypoint.sh"]
+ENTRYPOINT ["sh","-x","/opt/entrypoint.sh"]
